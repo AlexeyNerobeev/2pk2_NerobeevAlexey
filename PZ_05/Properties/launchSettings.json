@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PZ_05": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
