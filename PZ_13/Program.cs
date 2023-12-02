@@ -42,7 +42,7 @@
             }
             return b;
         }
-        static int Summ(int x)
+        static int Summ(int x) //№4
         {
             int result = 0;
             if (x > 0)
