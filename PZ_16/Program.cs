@@ -60,28 +60,21 @@
                 case ConsoleKey.Z:
                     Console.Clear();
                     Console.SetCursorPosition(40, 15);
-                    using (StreamReader reader = new StreamReader(@"C:\Users\User\source\repos\ConsoleApp3\ConsoleApp3\bin\Debug\net6.0\save.txt"))
+                    LoadGame();
+                    while (gameRunning)
                     {
-                        InitializeMap();
-                        InitializePlayer();
-                        InitializeEnemies();
-                        InitializeItems();
+                        Console.Clear();
+                        DrawMap();
 
-                        while (gameRunning)
+                        ConsoleKeyInfo keyInfo = Console.ReadKey();
+                        HandlePlayerMovement(keyInfo);
+
+                        if (keyInfo.Key == ConsoleKey.Escape)
                         {
-                            Console.Clear();
-                            DrawMap();
-
-                            ConsoleKeyInfo keyInfo = Console.ReadKey();
-                            HandlePlayerMovement(keyInfo);
-
-                            if (keyInfo.Key == ConsoleKey.Escape)
-                            {
-                                GameOver();
-                            }
-
-                            steps++;
+                            GameOver();
                         }
+
+                        steps++;
                     }
                     break;
                 default: //если игрок нажимает на другие клавиши то стартовый экран не пропадает
@@ -92,6 +85,7 @@
 
         static void InitializeMap()
         {
+            Console.Clear();
             // Генерация карты
             for (int i = 0; i < 25; i++)
             {
@@ -168,6 +162,24 @@
             {
                 for (int j = 0; j < 25; j++)
                 {
+                    switch (map[i, j])
+                    {
+                        case 'P':
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                            break;
+                        case 'E':
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            break;
+                        case 'H':
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            break;
+                        case 'B':
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+                        default:
+                            Console.ResetColor();
+                            break;
+                    }
                     Console.Write(map[i, j]);
                 }
                 Console.WriteLine();
@@ -302,27 +314,43 @@
             // Создание или перезапись файла save.txt
             using (StreamWriter writer = new StreamWriter("save.txt"))
             {
+
                 writer.WriteLine(playerX);
                 writer.WriteLine(playerY);
                 writer.WriteLine(playerHP);
                 writer.WriteLine(playerDamage);
-
-                for (int i = 0; i < 10; i++)
-                {
-                    writer.WriteLine(enemyX[i]);
-                    writer.WriteLine(enemyY[i]);
-                    writer.WriteLine(enemyHP[i]);
-                    writer.WriteLine(enemyDamage[i]);
-                }
-
-                for (int i = 0; i < 5; i++)
-                {
-                    writer.WriteLine(itemX[i]);
-                    writer.WriteLine(itemY[i]);
-                    writer.WriteLine(itemType[i]);
-                }
-
                 writer.WriteLine(steps);
+
+                // Сохранение карты в файл
+                for (int i = 0; i < 25; i++)
+                {
+                    for (int j = 0; j < 25; j++)
+                    {
+                        writer.Write(map[i, j]);
+                    }
+                    writer.WriteLine();
+
+                }
+            }
+        }
+
+        static void LoadGame()
+        {
+            using (StreamReader reader = new StreamReader("save.txt"))
+            {
+                playerX = int.Parse(reader.ReadLine());
+                playerY = int.Parse(reader.ReadLine());
+                playerHP = int.Parse(reader.ReadLine());
+                playerDamage = int.Parse(reader.ReadLine());
+                steps = int.Parse(reader.ReadLine());
+                for (int i = 0; i < 25; i++)
+                {
+                    string save = reader.ReadLine();
+                    for (int j = 0; j < 25; j++)
+                    {
+                        map[i, j] = save[j];
+                    }
+                }
             }
         }
     }
