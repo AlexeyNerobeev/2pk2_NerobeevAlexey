@@ -8,11 +8,17 @@
         static int playerDamage = 10;
         static int steps = 0;
         static int enemyCount = 10;
+        static int bossCount = 1;
+        static int animationDelay = 100;
 
         static int[] enemyX = new int[10];
         static int[] enemyY = new int[10];
         static int[] enemyHP = new int[10];
         static int[] enemyDamage = new int[10];
+        static int[] bossX = new int[10];
+        static int[] bossY = new int[10];
+        static int[] bossHP = new int[10];
+        static int[] bossDamage = new int[10];
 
         static int[] itemX = new int[10];
         static int[] itemY = new int[10];
@@ -150,8 +156,8 @@
                 }
                 else
                 {
-                    itemType[i] = 'B'; // Бафф
-                    map[y, x] = 'B';
+                    itemType[i] = 'b'; // Бафф
+                    map[y, x] = 'b';
                 }
             }
         }
@@ -173,8 +179,11 @@
                         case 'H':
                             Console.ForegroundColor = ConsoleColor.Green;
                             break;
-                        case 'B':
+                        case 'b':
                             Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+                        case 'B':
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
                             break;
                         default:
                             Console.ResetColor();
@@ -229,7 +238,7 @@
                     map[playerY, playerX] = 'P';
                     playerHP = 50;
                 }
-                else if (map[newY, newX] == 'B')
+                else if (map[newY, newX] == 'b')
                 {
                     map[playerY, playerX] = '_';
                     playerX = newX;
@@ -239,6 +248,17 @@
                 }
                 else if (map[newY, newX] == 'E')
                 {
+                    // Анимация столкновения
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Console.SetCursorPosition(playerX, playerY);
+                        Console.Write("X");
+                        Thread.Sleep(animationDelay);
+                        Console.SetCursorPosition(playerX, playerY);
+                        Console.Write("P");
+                        Thread.Sleep(animationDelay);
+                    }
+
                     map[playerY, playerX] = '_';
                     playerX = newX;
                     playerY = newY;
@@ -258,13 +278,61 @@
                         playerHP -= 5;
                         enemyCount--;
                     }
-                    if (enemyCount == 0)
-                    {
-                        GameOverWin();
-                    }
                     if (playerHP <= 0)
                     {
                         GameOverLose();
+                    }
+                }
+                if (enemyCount == 0)
+                {
+                    if(bossCount == 1)
+                    {
+
+                        Random random = new Random();
+
+                        // Генерация босса
+                        for (int i = 0; i < 1; i++)
+                        {
+                            int x, y;
+                            do
+                            {
+                                x = random.Next(0, 25);
+                                y = random.Next(0, 25);
+                            } while (map[y, x] != '_');
+
+                            bossX[i] = x;
+                            bossY[i] = y;
+                            bossHP[i] = 100;
+                            bossDamage[i] = 30;
+                            map[y, x] = 'B';
+                            bossCount--;
+                        }
+                    }
+                    if(map[newY, newX] == 'B')
+                    {
+                        // Анимация столкновения
+                        for (int i = 0; i < 3; i++)
+                        {
+                            Console.SetCursorPosition(playerX, playerY);
+                            Console.Write("X");
+                            Thread.Sleep(animationDelay);
+                            Console.SetCursorPosition(playerX, playerY);
+                            Console.Write("P");
+                            Thread.Sleep(animationDelay);
+                        }
+
+                        map[playerY, playerX] = '_';
+                        playerX = newX;
+                        playerY = newY;
+                        map[playerY, playerX] = 'P';
+                        if(playerDamage < 100 || playerHP <= 30)
+                        {
+                            GameOverLose();
+                        }
+                        if(playerDamage >= 100 && playerHP > 30)
+                        {
+                            GameOverWin();
+                        }
                     }
                 }
             }
@@ -320,6 +388,8 @@
                 writer.WriteLine(playerHP);
                 writer.WriteLine(playerDamage);
                 writer.WriteLine(steps);
+                writer.WriteLine(enemyCount);
+                writer.WriteLine(bossCount);
 
                 // Сохранение карты в файл
                 for (int i = 0; i < 25; i++)
@@ -343,6 +413,8 @@
                 playerHP = int.Parse(reader.ReadLine());
                 playerDamage = int.Parse(reader.ReadLine());
                 steps = int.Parse(reader.ReadLine());
+                enemyCount = int.Parse(reader.ReadLine());
+                bossCount = int.Parse(reader.ReadLine());
                 for (int i = 0; i < 25; i++)
                 {
                     string save = reader.ReadLine();
